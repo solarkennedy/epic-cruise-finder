@@ -6,7 +6,11 @@ require 'open-uri'
 require 'hpricot'
 require 'ruby-debug'
 require 'active_record'
+require 'database_junk.rb'
 ActiveRecord::Base.logger = Logger.new(STDERR)
+db_config = YAML::load(File.open('database.yml'))
+ActiveRecord::Base.establish_connection(db_config["development"])
+
 
 def fetch(url)
 	response = ""
@@ -48,7 +52,7 @@ def scrape_page(page_num)
 		if ( (result).inner_html =~ /.*No departures.*/ )
 			puts "No departures for this cruise. Continuing."
 		else
-	  		begin
+	  	#	begin
 	  			# Extract info
 	  			title = result.search("#browse-results-name")
 	  			description = title.inner_html
@@ -93,16 +97,29 @@ def scrape_page(page_num)
 	  				puts "Finished with that instance"
 	  			
 	  			end # end instance loop
-	  		 rescue 
-	  		 	puts "result exception raised, this html is not parseable for some reason"
-	  		 	debugger
-	  		end # end begin 
+	  	#	 rescue 
+	  	#	 	puts "result exception raised, this html is not parseable for some reason"
+	  #		 	debugger
+	  	#	end # end begin 
 		end # end if
 	end #end for result
 	puts "Analyzing the page..."
 end
 
 def insert_cruise( cruise_id, description, link, cruiseline, length, start_date, departure_port, arrival_port, price ) 
+#	begin
+		puts "Inserting cruise into db"
+		cruise = Cruise.create(
+			:cruise_id => cruise_id,
+			:description => description,
+			:link => link,
+			:cruiseline => cruiseline,
+			:length => length,
+			:start_date => start_date,
+			:departure_port => departure_port,
+			:arrival_port => arrival_port,
+			:price => price
+			)
 
 			puts ""
 			puts "Cruise ID: " + cruise_id
@@ -115,6 +132,10 @@ def insert_cruise( cruise_id, description, link, cruiseline, length, start_date,
 			puts "Arrival Port: " + arrival_port
 			puts "Price: " + price.to_s
 			puts ""
+#	rescue 
+#		puts "insert_cruise failed, figure it out"
+#		debugger
+#	end
 end
 
 def main 

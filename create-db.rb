@@ -6,7 +6,7 @@ require 'active_record'
 ActiveRecord::Base.logger = Logger.new(STDERR)
 
 db_config = YAML::load(File.open('database.yml'))
-ActiveRecord::Base.establish_connection(db_config)
+ActiveRecord::Base.establish_connection(db_config["development"])
 
 ActiveRecord::Schema.define do
     create_table :cruises do |table|
