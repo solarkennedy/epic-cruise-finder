@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby
+#!/usr/bin/env ruby1.8
 
 require 'rubygems'
 require 'ruby-debug'
@@ -10,7 +10,6 @@ ActiveRecord::Base.establish_connection(db_config["development"])
 
 ActiveRecord::Schema.define do
     create_table :cruises do |table|
-        table.column :cruise_id, :string
         table.column :description, :string
         table.column :link, :string
         table.column :cruiseline, :string

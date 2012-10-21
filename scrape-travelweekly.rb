@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby
+#!/usr/bin/env ruby1.8
 # Abuses cruises weekly's TOS (I presume) by scraping their pages extracting cruise info
 
 require 'rubygems'
@@ -75,10 +75,8 @@ def scrape_page(page_num)
 					next if ( (instance/"a").to_html =~ /.*See more sailing dates for this cruise.*/ )
 					# Most cases, we have a link in the top 
 					if ( (instance/"a").to_html =~ /.*href.*/ ) 
-	  					cruise_id = (instance/"a").to_html.split('"')[1].split("=")[1]
 	  					link = "http://www.travelweekly.com" +  (instance/"a").to_html.split('"')[1]
 					else # Other case, where the instance is not a link
-						cruise_id = (result/"div[4]/table/tbody/tr/td[1]/a").to_html.split('"')[1].split('=')[1]
 	  					link = "http://www.travelweekly.com" +  (result/"div[4]/table/tbody/tr/td[1]/a").to_html.split('"')[1]
 					end
 	  				start_date = (instance/"a").inner_html
@@ -92,7 +90,8 @@ def scrape_page(page_num)
 						puts "Price is 0? Something is bogus. Figure it out"
 						debugger
 					end
-	  				insert_cruise( cruise_id, description, link, cruiseline, length, start_date, departure_port, arrival_port, price ) 
+
+	  				insert_cruise( description, link, cruiseline, length, start_date, departure_port, arrival_port, price ) 
 
 	  				puts "Finished with that instance"
 	  			
@@ -106,11 +105,10 @@ def scrape_page(page_num)
 	puts "Analyzing the page..."
 end
 
-def insert_cruise( cruise_id, description, link, cruiseline, length, start_date, departure_port, arrival_port, price ) 
+def insert_cruise( description, link, cruiseline, length, start_date, departure_port, arrival_port, price ) 
 #	begin
 		puts "Inserting cruise into db"
 		cruise = Cruise.create(
-			:cruise_id => cruise_id,
 			:description => description,
 			:link => link,
 			:cruiseline => cruiseline,
@@ -122,7 +120,6 @@ def insert_cruise( cruise_id, description, link, cruiseline, length, start_date,
 			)
 
 			puts ""
-			puts "Cruise ID: " + cruise_id
 			puts "Got a cruise: " + description
 			puts "Link: " + link
 			puts "Cruiseline: " + cruiseline
