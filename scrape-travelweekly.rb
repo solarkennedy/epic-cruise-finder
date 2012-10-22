@@ -7,9 +7,12 @@ require 'hpricot'
 require 'ruby-debug'
 require 'active_record'
 require 'database_junk.rb'
-ActiveRecord::Base.logger = Logger.new(STDERR)
-db_config = YAML::load(File.open('database.yml'))
-ActiveRecord::Base.establish_connection(db_config["development"])
+require 'parsedate'
+require 'chronic'
+
+#ActiveRecord::Base.logger = Logger.new(STDERR)
+#db_config = YAML::load(File.open('database.yml'))
+#ActiveRecord::Base.establish_connection(db_config["development"])
 
 
 def fetch(url)
@@ -69,15 +72,16 @@ def scrape_page(page_num)
 					more_url = "http://www.travelweekly.com" + morelink + "&all=1"
 					moreinfo = fetch(more_url)
 					itinerary_rows = (moreinfo/"/html/body/div/div[2]/form/div[1]/div[3]/div/div[1]/table/tr/td")
-					departure_port = itinerary_rows[-2].innerHTML.gsub(/Arrive at /, "").split("-")[0]
+					unsanitized_departure_port = itinerary_rows[-2].innerHTML.gsub(/Arrive at /, "").split("-")[0]
 					rescue
 					puts "moreinfo broke"
 					debugger
 					end
 	
 				else
-	  				departure_port = (result/"/div[3]/div/span/b[2]").each.first.following.to_html.split("<")[0].strip
+	  				unsanitized_departure_port = (result/"/div[3]/div/span/b[2]").each.first.following.to_html.split("<")[0].strip
 				end
+				departure_port = sanitize_port( unsanitized_departure_port )
 
 				# Grab the last part of this string, delemited by a semi-colon, and strip it
 	  			unsanitized_arrival_port = (result/"/div[3]/div/span/b[3]").each.first.following.to_html.split("<")[0].split(";")[-1].strip.gsub(/"/, "")
@@ -100,7 +104,12 @@ def scrape_page(page_num)
 					else # Other case, where the instance is not a link
 	  					link = "http://www.travelweekly.com" +  (result/"div[4]/table/tbody/tr/td[1]/a").to_html.split('"')[1]
 					end
-	  				start_date = (instance/"a").inner_html
+					begin
+	  				start_date = Date.parse((instance).innerText)
+	  				end_date = start_date + length
+					rescue
+					debugger
+					end
 	  				prices = instance.following.inner_html.split("$")
 					next if ( prices ==  ["Contact cruise line for pricing & availability"] )
 	  				prices = prices.collect{ |e| e.gsub('-','') }
@@ -112,7 +121,7 @@ def scrape_page(page_num)
 						debugger
 					end
 
-	  				insert_cruise( description, link, cruiseline, length, start_date, departure_port, arrival_port, price ) 
+	  				insert_cruise( description, link, cruiseline, length, start_date, end_date, departure_port, arrival_port, price ) 
 
 	  				puts "Finished with that instance"
 	  			
@@ -127,7 +136,7 @@ def scrape_page(page_num)
 	puts "Analyzing the page..."
 end
 
-def insert_cruise( description, link, cruiseline, length, start_date, departure_port, arrival_port, price ) 
+def insert_cruise( description, link, cruiseline, length, start_date, end_date, departure_port, arrival_port, price ) 
 #	begin
 		puts "Inserting cruise into db"
 		cruise = Cruise.create(
@@ -136,6 +145,7 @@ def insert_cruise( description, link, cruiseline, length, start_date, departure_
 			:cruiseline => cruiseline,
 			:length => length,
 			:start_date => start_date,
+			:end_date => end_date,
 			:departure_port => departure_port,
 			:arrival_port => arrival_port,
 			:price => price
@@ -146,7 +156,8 @@ def insert_cruise( description, link, cruiseline, length, start_date, departure_
 			puts "Link: " + link
 			puts "Cruiseline: " + cruiseline
 			puts "Length: " + length.to_s
-			puts "Start Date: " + start_date
+			puts "Start Date: " + start_date.to_s
+			puts "End Date: " + end_date.to_s
 			puts "Departure Port: " + departure_port
 			puts "Arrival Port: " + arrival_port
 			puts "Price: " + price.to_s
@@ -155,15 +166,6 @@ def insert_cruise( description, link, cruiseline, length, start_date, departure_
 #		puts "insert_cruise failed, figure it out"
 #		debugger
 #	end
-end
-
-def main 
-#   number_of_pages = scrape_num_pages("http://www.travelweekly.com/Cruise/Cruise-Search?stype=CRUS")
-   # Only the first 105 pages or so have prices  
-   for page in 19..105
-   	scrape_page(page)
-   	puts "scraping page " + page.to_s
-   end
 end
 
 def sanitize_port( p )
@@ -377,11 +379,19 @@ def sanitize_port( p )
 		else
 			puts "Your sanitize_port function didn't work for " + p
 			puts "Figure it out"
-			r = p
-#			exit
+			exit
 	end # end case
 	return r
 end
 	
+def main 
+#   number_of_pages = scrape_num_pages("http://www.travelweekly.com/Cruise/Cruise-Search?stype=CRUS")
+   # Only the first 105 pages or so have prices  
+   for page in 1..10
+   	scrape_page(page)
+   	puts "scraping page " + page.to_s
+   end
+end
+
 
 main
