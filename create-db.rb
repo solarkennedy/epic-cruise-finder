@@ -13,10 +13,11 @@ ActiveRecord::Schema.define do
         table.column :description, :string
         table.column :link, :string
         table.column :cruiseline, :string
-        table.column :length, :string
+        table.column :length, :integer
         table.column :start_date, :string
+        table.column :end_date, :string
         table.column :departure_port, :string
         table.column :arrival_port, :string
-        table.column :price, :string
+        table.column :price, :integer
     end
 end
