@@ -11,7 +11,7 @@ require 'chronic'
 def fetch(url)
 	puts "now fetchin " + url
 	response = ""
-	filename = "411cache/" + url.split("/")[-1]
+	filename = "cache/" + url.split("/")[-1]
 	
 	begin
 	#If the file doesn't exist, download it
