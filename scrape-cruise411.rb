@@ -37,38 +37,47 @@ def scrape_page(page_num)
 	url = "http://www3.cruise411.com/results.do?port=&IncludeSeniorRates=false&d=Tue%20Oct%2023%2022:21:23%20EDT%202012&sort_by=1&c=ALL&IncludeAlumniRates=false&shoppingZipCode=Zip%20Code&places=ALL&fd=&Month=ALL&dd=&v=&d2=Wed%20Apr%2022%2022:21:23%20EDT%202015&price=0&days=ALL&p=ALL&index=" + page_num.to_s
 	puts "Fetching " + url
 	doc = fetch(url)
-	for result in .each
+	
+	puts "scrape that doc"
+	debugger
+	puts "done?"
+	
+	results = (doc/"/html/body/div/div[3]/table/tr[2]/td[3]/table/tr[5]/td/form/div")
+	for result in results.each
 	     # Extract info
-	     title = 
-	     description = 
-	     cruiseline = 
-	     length = 
+	     title = (result/"a").inner_text.split("\n")[0]
+	     length = title.split(" ")[0]
+	     link = "http://www3.cruise411.com/" + (result/"a")[1].to_s.split('"')[1].gsub(/&amp;/,"&")
 
-	     unsanitized_arrival_port = 
-	     arrival_port = sanitize_port( unsanitized_arrival_port )
+	     cruise_info = fetch(link)
+	     cruiseline = cruise_info.search("#sc_cruiseline").inner_text
 
-	     unsanitized_departure_port = 
-	     departure_port = sanitize_port( unsanitized_departure_port )
-
-	     # Multiple leavings for the same trip
-	     # Fetch the link for the title
-	     resultinfo = fetch(link)
-	     for instance in instances
-	     	start_date = 
-	     	end_date = start_date + length
-	     	
-	     	prices = instance.following.inner_html.split("$")
-	     	price = prices.min
-	     	if price == 0 
-	     		puts "Price is 0? Something is bogus. Figure it out"
-	     		debugger
-	     	end
-
-	     	insert_cruise( description, link, cruiseline, length, start_date, end_date, departure_port, arrival_port, price ) 
-
-	     	puts "Finished with that instance"
-	     
-	     end # end instance loop
+	     ports = (cruise_info/"/html/body/div/div[3]/table[2]/tr[3]/td[1]/").inner_html
+#	     unsanitized_arrival_port = 
+#	     arrival_port = sanitize_port( unsanitized_arrival_port )
+#	     unsanitized_departure_port = 
+#	     departure_port = sanitize_port( unsanitized_departure_port )
+#
+#	     # Multiple leavings for the same trip
+#	     # Fetch the link for the title
+#	     resultinfo = fetch(link)
+	     instances = (cruise_info/"/html/body/div/div[3]/table[3]/tr")
+#	     for instance in instances
+#	     	start_date = 
+#	     	end_date = start_date + length
+#	     	
+#	     	prices = (cruise_info/"/html/body/div/div[3]/table/tr[15]/")
+#	     	price = prices.min
+#	     	if price == 0 
+#	     		puts "Price is 0? Something is bogus. Figure it out"
+#	     		debugger
+#	     	end
+#
+#	     	insert_cruise( description, link, cruiseline, length, start_date, end_date, departure_port, arrival_port, price ) 
+#
+#	     	puts "Finished with that instance"
+#	     
+#	     end # end instance loop
 
 	end #end for result
 	puts "Analyzing the page..."
