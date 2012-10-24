@@ -192,6 +192,8 @@ def sanitize_port( p )
 			r = "Barcelona, Spain"
 		when p.match(/Bari/i)
 			r = "Bari, Italy"
+		when p.match(/Berlin/i)
+			r = "Warnemunde, Germany"
 		when p.match(/Beijing/i)
 			r = "Beijing, China"
 		when p.match(/Benoa/i)
@@ -280,6 +282,8 @@ def sanitize_port( p )
 			r = "Malaga, Spain"
 		when p.match(/Manaus/i)
 			r = "Manaus, Brazil"
+		when p.match(/Marigot/i)
+			r = "Marigot, St. Martin"
 		when p.match(/Marseille/i)
 			r = "Marseille, France"
 		when p.match(/Melbourne/i)
@@ -292,7 +296,7 @@ def sanitize_port( p )
 			r = "Monte Carlo, Monaco"
 		when p.match(/Montreal/i)
 			r = "Montreal, PQ"
-		when p.match(/Mumbia/i)
+		when p.match(/Mumbai/i)
 			r = "Mumbai, India"
 		when p.match(/Naples/i), p.match(/Napoli/i)
 			r = "Naples, Italy"
@@ -302,7 +306,7 @@ def sanitize_port( p )
 			r = "New York, NY"
 		when p.match(/Norfolk/i)
 			r = "Norfolk, VA"
-		when p.match(/Norfolk/i)
+		when p.match(/Oranjestad/i)
 			r = "Oranjestad, Aruba"
 		when p.match(/Palma de Mallorca/i)
 			r = "Palma de Mallorca, Mallorca Island, Balearic Islands, Spain"
@@ -389,7 +393,7 @@ end
 def main 
 #   number_of_pages = scrape_num_pages("http://www.travelweekly.com/Cruise/Cruise-Search?stype=CRUS")
    # Only the first 105 pages or so have prices  
-   for page in 1..105
+   for page in 46..105
    	scrape_page(page)
    	puts "scraping page " + page.to_s
    end
