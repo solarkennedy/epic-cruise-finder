@@ -7,22 +7,28 @@ require 'database_junk.rb'
 # 
 # Finds cruise chains that meet criteria
 $max_layover = 5
-$max_ppn = 50
+$max_ppn = 64
 $max_cruises = 10
-$max_price = 10000
-$start_location = "Seattle, WA"
+$max_price = 40000
+$start_location = "Tampa, FL"
+#$start_location = "Seattle, WA"
 
 
 def is_overbudget ( cruises ) 
+   begin
 	for cruise in cruises.each
-		totalprice = totalprice + cruise.price
-		totaldays = totaldays + cruise.lenght
+		totalprice = totalprice.to_i + cruise.price.to_i
+		totaldays = totaldays.to_i + cruise.length.to_i
 	end
-	if totalprice > max_price || (totalprice/totaldays) > price_per_night
+	if totalprice > $max_price || (totalprice/totaldays) > $max_ppn || cruises.length > $max_cruises
 		return true
 	else
 		return false
 	end
+   rescue
+        puts "is_overbudget broke"
+	debugger
+   end
 end # is_overbudget
 
 def addcruise( cruise_list, cruise ) 
@@ -34,20 +40,28 @@ def addcruise( cruise_list, cruise )
 		return 1
 	#  if we are back were we are started, then we are done
 	elsif ( whereweare == $start_location )
-		print_cruise( cruises)
+		print_cruise( new_cruise_list )
 		return 0
 	# Otherwise, we sail on 
 	else
-		for next_cruise in Cruisefind_all_by_departure_port( whereweare ).each
+		for next_cruise in Cruise.find_all_by_departure_port( whereweare ).each
 			addcruise( new_cruise_list, next_cruise )
 		end
 	end
 end # end add cruise
 
 def print_cruise( cruises )
+	puts "We found a cruise!"
 	for cruise in cruises.each
-		cruise.print
+		puts "	" + cruise.description.to_s + " (" + cruise.link.to_s + ")"
+		totalprice = totalprice.to_i + cruise.price.to_i
+                totaldays = totaldays.to_i + cruise.length.to_i
 	end
+	puts "Finishing Port: " + cruises[-1].arrival_port.to_s
+	puts "Total Price:  " + totalprice.to_s
+	puts "Total Length: " + totaldays.to_s
+	puts "Average PPN:  " + (totalprice/totaldays).to_s
+	puts ""
 end #end print_cruise
 
 def main
@@ -55,7 +69,7 @@ def main
 	cruise_list = []
 
 	# Initial search, starting at our selected start_location
-	puts "Searching for curises starting at" + $start_location
+	puts "Beginning Search at starting location: " + $start_location
 	for cruise in Cruise.find_all_by_departure_port($start_location).each
 		addcruise( cruise_list, cruise )
 	end
