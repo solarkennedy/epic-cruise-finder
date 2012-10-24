@@ -72,20 +72,22 @@ def scrape_page(page_num)
 					more_url = "http://www.travelweekly.com" + morelink + "&all=1"
 					moreinfo = fetch(more_url)
 					itinerary_rows = (moreinfo/"/html/body/div/div[2]/form/div[1]/div[3]/div/div[1]/table/tr/td")
-					unsanitized_departure_port = itinerary_rows[-2].innerHTML.gsub(/Arrive at /, "").split("-")[0]
+					unsanitized_arrival_port = itinerary_rows[-2].innerHTML.gsub(/Arrive at /, "").split("-")[0]
 					rescue
 					puts "moreinfo broke"
 					debugger
 					end
 	
 				else
-	  				unsanitized_departure_port = (result/"/div[3]/div/span/b[2]").each.first.following.to_html.split("<")[0].strip
+	  				unsanitized_arrival_port = (result/"/div[3]/div/span/b[3]").each.first.following.to_html.split("<")[0].split(";")[-1].strip.gsub(/"/, "")
 				end
-				departure_port = sanitize_port( unsanitized_departure_port )
+				arrival_port = sanitize_port( unsanitized_arrival_port )
 
 				# Grab the last part of this string, delemited by a semi-colon, and strip it
-	  			unsanitized_arrival_port = (result/"/div[3]/div/span/b[3]").each.first.following.to_html.split("<")[0].split(";")[-1].strip.gsub(/"/, "")
-				arrival_port = sanitize_port( unsanitized_arrival_port )
+	  			unsanitized_departure_port = (result/"/div[3]/div/span/b[2]").each.first.following.to_html.split("<")[0].strip
+				debugger if unsanitized_departure_port == "CHARLOTTETOWN"
+				departure_port = sanitize_port( unsanitized_departure_port )
+
 	  			# Multiple leavings for the same trip
 			    	if ( (result).inner_html =~ /.*See more sailing dates for this cruise.*/ )
 					# If there are more dates, we have to scrap the all page
@@ -180,7 +182,7 @@ def sanitize_port( p )
 	case
 		when p.match(/Amsterdam/i)
 			r = "Amsterdam, Netherlands"
-		when p.match(/Aukland/i)
+		when p.match(/Auckland/i)
 			r = "Auckland, New Zealand"
 		when p.match(/Baltimore/i)
 			r = "Baltimore, MD"
@@ -248,15 +250,15 @@ def sanitize_port( p )
 			r = "Havana, Cuba"
 		when p.match(/Heraklion/i)
 			r = "Heraklion, Crete Island, Greece"
-		when p.match(/Hong Kong/i)
+		when p.match(/Hong Kong/i), p.match(/Hongkong/i)
 			r = "Hong Kong, Hong Kong"
 		when p.match(/Honolulu/i)
 			r = "Honolulu, HI"
-		when p.match(/Istanbul/i)
+		when p.match(/Istanbul/i), p.match(/Izmir/i)
 			r = "Istanbul, Turkey"
 		when p.match(/Jacksonville/i)
 			r = "Jacksonville, FL"
-		when p.match(/Keil/i)
+		when p.match(/Kiel/i)
 			r = "Kiel, Germany"
 		when p.match(/Kobe/i)
 			r = "Kobe, Japan"
@@ -268,7 +270,7 @@ def sanitize_port( p )
 			r = "Limon, Costa Rica"
 		when p.match(/Lisbon/i)
 			r = "Lisbon, Portugal"
-		when p.match(/Livorno/i)
+		when p.match(/Livorno/i), p.match(/Florence/i)
 			r = "Livorno, Italy"
 		when p.match(/Long Beach/i)
 			r = "Long Beach, CA"
@@ -330,7 +332,7 @@ def sanitize_port( p )
 			r = "San Francisco, CA"
 		when p.match(/San Juan/i)
 			r = "San Juan, Puerto Rico"
-		when p.match(/Santa Cruz de Tenerife/i)
+		when p.match(/Santa Cruz/i)
 			r = "Santa Cruz de Tenerife, Tenerife Island, Canary Islands, Spain"
 		when p.match(/Santos/i)
 			r = "Santos, Brazil"
@@ -387,7 +389,7 @@ end
 def main 
 #   number_of_pages = scrape_num_pages("http://www.travelweekly.com/Cruise/Cruise-Search?stype=CRUS")
    # Only the first 105 pages or so have prices  
-   for page in 1..10
+   for page in 1..105
    	scrape_page(page)
    	puts "scraping page " + page.to_s
    end
