@@ -7,7 +7,7 @@ require 'database_junk.rb'
 # 
 # Finds cruise chains that meet criteria
 $max_layover = 5
-$max_ppn = 64
+$max_ppn = 100
 $max_cruises = 10
 $max_price = 40000
 $start_location = "Tampa, FL"
@@ -38,15 +38,16 @@ def addcruise( cruise_list, cruise )
 	# quit right away if we are now over budget after the cruise just added
 	if ( is_overbudget( new_cruise_list ) )
 		return 1
-	#  if we are back were we are started, then we are done
-	elsif ( whereweare == $start_location )
+	end
+
+	different_ports = new_cruise_list.map{ |x| x.departure_port }.uniq.length
+	if ( whereweare == $start_location && new_cruise_list.length > 1 && different_ports > 1 )
 		print_cruise( new_cruise_list )
-		return 0
+	end
+
 	# Otherwise, we sail on 
-	else
-		for next_cruise in Cruise.find_all_by_departure_port( whereweare ).each
-			addcruise( new_cruise_list, next_cruise )
-		end
+	for next_cruise in Cruise.find(:all, :conditions => ['departure_port = ? AND start_date = ?', whereweare, cruise.end_date])
+		addcruise( new_cruise_list, next_cruise )
 	end
 end # end add cruise
 
@@ -70,8 +71,14 @@ def main
 
 	# Initial search, starting at our selected start_location
 	puts "Beginning Search at starting location: " + $start_location
-	for cruise in Cruise.find_all_by_departure_port($start_location).each
+	starting_cruises = Cruise.find_all_by_departure_port($start_location)
+	total_starting_cruises = starting_cruises.length
+	counter = 1
+	for cruise in starting_cruises.each
+		puts "Progress: " + counter.to_s + " / " + total_starting_cruises.to_s
 		addcruise( cruise_list, cruise )
+		counter = counter + 1
+		
 	end
 end #main
 
