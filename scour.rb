@@ -6,8 +6,8 @@ require 'database_junk.rb'
 
 # 
 # Finds cruise chains that meet criteria
-$max_layover = 5
-$max_ppn = 100
+$max_layover = 3
+$max_ppn = 80
 $max_cruises = 10
 $max_price = 40000
 $start_location = "Tampa, FL"
@@ -46,8 +46,14 @@ def addcruise( cruise_list, cruise )
 	end
 
 	# Otherwise, we sail on 
-	for next_cruise in Cruise.find(:all, :conditions => ['departure_port = ? AND start_date = ?', whereweare, cruise.end_date])
-		addcruise( new_cruise_list, next_cruise )
+	# I'm a lazy sql dude. Here we iterate over our max layover dates, searching for cruises
+	# on each of the possible layover days
+	d = Date.parse(cruise.end_date)
+	for counter in 0..$max_layover
+		search_date = (d + counter).to_s
+		for next_cruise in Cruise.find(:all, :conditions => ['departure_port = ? AND start_date = ?', whereweare, search_date])
+			addcruise( new_cruise_list, next_cruise )
+		end
 	end
 end # end add cruise
 
