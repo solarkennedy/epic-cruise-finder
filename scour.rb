@@ -6,8 +6,8 @@ require 'database_junk.rb'
 
 # 
 # Finds cruise chains that meet criteria
-$max_layover = 0
-$max_ppn = 50
+$max_layover = 2
+$max_ppn = 100
 $max_price = 40000
 $start_location = "Tampa, FL"
 #$start_location = "Seattle, WA"
@@ -60,55 +60,55 @@ def main
 	puts "Beginning Search at starting location: " + $start_location
 	starting_cruises = Cruise.find_all_by_departure_port($start_location)
 	total_starting_cruises = starting_cruises.length
-	counter = 1
+	counter = 0
 	for cruise1 in starting_cruises.each
-		puts "Progress: " + counter.to_s + " / " + total_starting_cruises.to_s
-		for cruise2 in potential_cruises( cruise1.arrival_port, cruise1.end_date )
-	           cruise_list = [ cruise1, cruise2 ]
-		   break if is_overbudget( cruise_list )
-		   for cruise3 in potential_cruises( cruise2.arrival_port, cruise2.end_date )
-	              cruise_list = [ cruise1, cruise2, cruise3 ]
-		      break if is_overbudget( cruise_list )
-	              print_cruise( cruise_list ) if ( cruise_list[-1].arrival_port == $start_location && cruise_list.length > 1 && cruise_list.map{ |x| x.departure_port }.uniq.length > 1 )
-		      for cruise4 in potential_cruises( cruise3.arrival_port, cruise3.end_date )
-	                 cruise_list = [ cruise1, cruise2, cruise3, cruise4 ]
-		         break if is_overbudget( cruise_list )
-	                 print_cruise( cruise_list ) if ( cruise_list[-1].arrival_port == $start_location && cruise_list.length > 1 && cruise_list.map{ |x| x.departure_port }.uniq.length > 1 )
-		         for cruise5 in potential_cruises( cruise4.arrival_port, cruise4.end_date )
-	                    cruise_list = [ cruise1, cruise2, cruise3, cruise4, cruise5 ]
-		            break if is_overbudget( cruise_list )
-	                    print_cruise( cruise_list ) if ( cruise_list[-1].arrival_port == $start_location && cruise_list.length > 1 && cruise_list.map{ |x| x.departure_port }.uniq.length > 1 )
-		            for cruise6 in potential_cruises( cruise5.arrival_port, cruise5.end_date )
-	                       cruise_list = [ cruise1, cruise2, cruise3, cruise4, cruise5, cruise6 ]
-		               break if is_overbudget( cruise_list )
-	                       print_cruise( cruise_list ) if ( cruise_list[-1].arrival_port == $start_location && cruise_list.length > 1 && cruise_list.map{ |x| x.departure_port }.uniq.length > 1 )
-		               for cruise7 in potential_cruises( cruise6.arrival_port, cruise6.end_date )
-	                          cruise_list = [ cruise1, cruise2, cruise3, cruise4, cruise5, cruise6, cruise7 ]
-		                  break if is_overbudget( cruise_list )
-	                          print_cruise( cruise_list ) if ( cruise_list[-1].arrival_port == $start_location && cruise_list.length > 1 && cruise_list.map{ |x| x.departure_port }.uniq.length > 1 )
-			          for cruise8 in potential_cruises( cruise7.arrival_port, cruise7.end_date )
-	                             cruise_list = [ cruise1, cruise2, cruise3, cruise4, cruise5, cruise6, cruise7, cruise8 ]
-		                     break if is_overbudget( cruise_list )
-	                             print_cruise( cruise_list ) if ( cruise_list[-1].arrival_port == $start_location && cruise_list.length > 1 && cruise_list.map{ |x| x.departure_port }.uniq.length > 1 )
-			             for cruise9 in potential_cruises( cruise8.arrival_port, cruise8.end_date )
-	                                cruise_list = [ cruise1, cruise2, cruise3, cruise4, cruise5, cruise6, cruise7, cruise8, cruise9 ]
-		                        break if is_overbudget( cruise_list )
-	                                print_cruise( cruise_list ) if ( cruise_list[-1].arrival_port == $start_location && cruise_list.length > 1 && cruise_list.map{ |x| x.departure_port }.uniq.length > 1 )
-			                for cruise10 in potential_cruises( cruise9.arrival_port, cruise9.end_date )
-	                                    cruise_list = [ cruise1, cruise2, cruise3, cruise4, cruise5, cruise6, cruise7, cruise8, cruise9, cruise10 ]
-		                            break if is_overbudget( cruise_list )
-	                                    print_cruise( cruise_list ) if ( cruise_list[-1].arrival_port == $start_location && cruise_list.length > 1 && cruise_list.map{ |x| x.departure_port }.uniq.length > 1 )
-                                        end
-                                     end
-                                  end
-                               end
-                            end
-                         end
-                      end
-                   end
-		end
-			
-		counter = counter + 1
+           counter = counter + 1
+	   puts "Progress: " + counter.to_s + " / " + total_starting_cruises.to_s
+	   # don't even bother checking for over budget until the second cruise
+	   for cruise2 in potential_cruises( cruise1.arrival_port, cruise1.end_date )
+	      cruise_list = [ cruise1, cruise2 ]
+	      break if is_overbudget( cruise_list )
+	      for cruise3 in potential_cruises( cruise2.arrival_port, cruise2.end_date )
+	         cruise_list = [ cruise1, cruise2, cruise3 ]
+	         break if is_overbudget( cruise_list )
+	         print_cruise( cruise_list ) if ( cruise_list[-1].arrival_port == $start_location && cruise_list.length > 1 && cruise_list.map{ |x| x.departure_port }.uniq.length > 1 )
+	         for cruise4 in potential_cruises( cruise3.arrival_port, cruise3.end_date )
+	            cruise_list = [ cruise1, cruise2, cruise3, cruise4 ]
+	            break if is_overbudget( cruise_list )
+	            print_cruise( cruise_list ) if ( cruise_list[-1].arrival_port == $start_location && cruise_list.length > 1 && cruise_list.map{ |x| x.departure_port }.uniq.length > 1 )
+	            for cruise5 in potential_cruises( cruise4.arrival_port, cruise4.end_date )
+	               cruise_list = [ cruise1, cruise2, cruise3, cruise4, cruise5 ]
+	               break if is_overbudget( cruise_list )
+	               print_cruise( cruise_list ) if ( cruise_list[-1].arrival_port == $start_location && cruise_list.length > 1 && cruise_list.map{ |x| x.departure_port }.uniq.length > 1 )
+	               for cruise6 in potential_cruises( cruise5.arrival_port, cruise5.end_date )
+	                  cruise_list = [ cruise1, cruise2, cruise3, cruise4, cruise5, cruise6 ]
+	                  break if is_overbudget( cruise_list )
+	                  print_cruise( cruise_list ) if ( cruise_list[-1].arrival_port == $start_location && cruise_list.length > 1 && cruise_list.map{ |x| x.departure_port }.uniq.length > 1 )
+	                  for cruise7 in potential_cruises( cruise6.arrival_port, cruise6.end_date )
+	                     cruise_list = [ cruise1, cruise2, cruise3, cruise4, cruise5, cruise6, cruise7 ]
+	                     break if is_overbudget( cruise_list )
+	                     print_cruise( cruise_list ) if ( cruise_list[-1].arrival_port == $start_location && cruise_list.length > 1 && cruise_list.map{ |x| x.departure_port }.uniq.length > 1 )
+	   	          for cruise8 in potential_cruises( cruise7.arrival_port, cruise7.end_date )
+	                        cruise_list = [ cruise1, cruise2, cruise3, cruise4, cruise5, cruise6, cruise7, cruise8 ]
+	                        break if is_overbudget( cruise_list )
+	                        print_cruise( cruise_list ) if ( cruise_list[-1].arrival_port == $start_location && cruise_list.length > 1 && cruise_list.map{ |x| x.departure_port }.uniq.length > 1 )
+	   	             for cruise9 in potential_cruises( cruise8.arrival_port, cruise8.end_date )
+	                           cruise_list = [ cruise1, cruise2, cruise3, cruise4, cruise5, cruise6, cruise7, cruise8, cruise9 ]
+	                           break if is_overbudget( cruise_list )
+	                           print_cruise( cruise_list ) if ( cruise_list[-1].arrival_port == $start_location && cruise_list.length > 1 && cruise_list.map{ |x| x.departure_port }.uniq.length > 1 )
+	   	                for cruise10 in potential_cruises( cruise9.arrival_port, cruise9.end_date )
+	                               cruise_list = [ cruise1, cruise2, cruise3, cruise4, cruise5, cruise6, cruise7, cruise8, cruise9, cruise10 ]
+	                               break if is_overbudget( cruise_list )
+	                               print_cruise( cruise_list ) if ( cruise_list[-1].arrival_port == $start_location && cruise_list.length > 1 && cruise_list.map{ |x| x.departure_port }.uniq.length > 1 )
+                                   end
+                                end
+                             end
+                          end
+                       end
+                    end
+                 end
+              end
+	   end
 	end
 end #main
 
