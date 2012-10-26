@@ -7,7 +7,7 @@ require 'database_junk.rb'
 # 
 # Finds cruise chains that meet criteria
 $max_layover = 0
-$max_ppn = 60
+$max_ppn = 50
 $max_cruises = 10
 $max_price = 40000
 $start_location = "Tampa, FL"
