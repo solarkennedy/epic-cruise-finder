@@ -6,8 +6,8 @@ require 'database_junk.rb'
 
 # 
 # Finds cruise chains that meet criteria
-$max_layover = 3
-$max_ppn = 80
+$max_layover = 0
+$max_ppn = 60
 $max_cruises = 10
 $max_price = 40000
 $start_location = "Tampa, FL"
@@ -15,7 +15,6 @@ $start_location = "Tampa, FL"
 
 
 def is_overbudget ( cruises ) 
-   begin
 	for cruise in cruises.each
 		totalprice = totalprice.to_i + cruise.price.to_i
 		totaldays = totaldays.to_i + cruise.length.to_i
@@ -25,10 +24,6 @@ def is_overbudget ( cruises )
 	else
 		return false
 	end
-   rescue
-        puts "is_overbudget broke"
-	debugger
-   end
 end # is_overbudget
 
 def addcruise( cruise_list, cruise ) 
